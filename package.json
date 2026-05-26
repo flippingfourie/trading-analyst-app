@@ -1,0 +1,22 @@
+{
+  "name": "trading-analyst-app",
+  "version": "1.0.0",
+  "description": "AI-assisted trading analysis with disciplined execution and honest journaling",
+  "main": "proxy-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node proxy-server.js",
+    "dev": "node proxy-server.js"
+  },
+  "keywords": [
+    "trading",
+    "analysis",
+    "chart",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
