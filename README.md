@@ -1,26 +1,36 @@
 # Trading Analyst App
 
-AI-assisted technical analysis with disciplined execution and honest journaling.
+AI-powered trading analysis guide with PDF export and interactive charts.
+
+## Setup
+
+1. **Set your Anthropic API key:**
+   ```bash
+   export ANTHROPIC_API_KEY="sk-ant-..."
+   ```
+
+2. **Run the proxy server:**
+   ```bash
+   npm start
+   ```
+   Server listens on `http://localhost:8787`
+
+3. **Use the app:**
+   - Open `trading-analysis-guide.html` in your browser
+   - Enable "Use local proxy"
+   - Set proxy URL to `http://localhost:8787/analyze`
 
 ## Deployment on Render
 
-1. **Add your Anthropic API key** to Render environment variables
-2. **Service will auto-start** on your Render URL
-3. **Open the URL** in your browser to access the app
+This repo is configured for automatic deployment on Render via `render.yaml`:
 
-## Features
+- Requires `ANTHROPIC_API_KEY` environment variable
+- Runs on Node.js 18+
+- Free tier compatible
 
-- **Chart Analysis**: Upload charts for AI-powered multi-timeframe analysis
-- **Live Data**: Real-time market data from multiple exchanges
-- **Risk Calculator**: Position sizing with strict risk management
-- **Trading Journal**: Log and review your trades
-- **AI Coach**: Personalized trading guidance
+## Testing
 
-## Local Development
-
+Run smoke tests locally:
 ```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-node proxy-server.js
+node test-proxy.mjs
 ```
-
-Then open `http://localhost:8787` in your browser.
