@@ -2069,6 +2069,24 @@
                 return { code: () => code, symbol: () => symbol(), fmt: format, set };
             })();
 
+            // Single source of truth for the proxy base URL (strips any trailing /analyze).
+            // Defined at the shared DOMContentLoaded scope so every init* function
+            // (analyst, coach, news, watcher, scanner, Monte Carlo) can call it.
+            function getProxyBase() {
+                // If the user typed a custom URL use that; otherwise auto-detect:
+                // a real host (Render etc.) uses its own origin, a local file falls back to localhost:8787.
+                const proxyUrlEl = document.getElementById('proxyUrl');
+                const stored = localStorage.getItem('tradingAnalyst.proxyUrl');
+                const inputVal = proxyUrlEl && proxyUrlEl.value ? proxyUrlEl.value.trim() : '';
+                const raw = inputVal || stored || '';
+                if (raw) return raw.replace(/\/analyze\/?$/, '');
+                const loc = window.location;
+                if (loc.protocol === 'file:' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1') {
+                    return 'http://localhost:8787';
+                }
+                return loc.origin;
+            }
+
             function initTabs() {
                 const groupDefaults = { analyze: 'analyst', journal: 'journal', learn: 'concepts' };
                 const groupSubtabs = {
@@ -2854,23 +2872,8 @@
                 const PROXY_URL_KEY = 'tradingAnalyst.proxyUrl';
                 const HISTORY_KEY = 'tradingAnalyst.history';
                 const TF_OPTIONS = ['1m', '5m', '15m', '1h', '4h', '1D', '1W'];
-                // Single source of truth for the proxy base URL (strips any trailing /analyze).
-                // Used by every fetch that hits localhost:8787/* — keeps URL massaging in one place
-                // and falls back to the default when the input is blank.
-                function getProxyBase() {
-                    // If user has typed a custom URL, use that.
-                    // Otherwise auto-detect: if served by a real host (Render etc.) use that origin.
-                    // If opened as a local file fall back to localhost:8787.
-                    const stored = localStorage.getItem(PROXY_URL_KEY);
-                    const inputVal = proxyUrl && proxyUrl.value ? proxyUrl.value.trim() : '';
-                    const raw = inputVal || stored || '';
-                    if (raw) return raw.replace(/\/analyze\/?$/, '');
-                    const loc = window.location;
-                    if (loc.protocol === 'file:' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1') {
-                        return 'http://localhost:8787';
-                    }
-                    return loc.origin;
-                }
+                // getProxyBase() is defined once at the shared DOMContentLoaded scope above
+                // so every init* module can reach it.
 
                 if (localStorage.getItem(STORAGE_KEY)) apiKeyInput.value = localStorage.getItem(STORAGE_KEY);
                 if (localStorage.getItem(MODEL_KEY)) modelInput.value = localStorage.getItem(MODEL_KEY);
