@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: trading-analyst
+    env: node
+    nodeVersion: 20.x
+    buildCommand: echo "No build needed"
+    startCommand: node proxy-server.js
+    plan: free
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
