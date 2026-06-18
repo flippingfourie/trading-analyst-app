@@ -2616,7 +2616,15 @@
                     if (!p) return;
                     FIELDS.forEach(f => {
                         const el = $(FIELD_TO_INPUT[f]);
-                        if (el && p[f] !== undefined) el.value = p[f];
+                        if (el && p[f] !== undefined) {
+                            let v = p[f];
+                            // Number inputs reject ranges like "5-10"; take the first number found.
+                            if (el.type === 'number' && typeof v === 'string' && !/^-?\d*\.?\d+$/.test(v.trim())) {
+                                const m = String(v).match(/-?\d*\.?\d+/);
+                                v = m ? m[0] : '';
+                            }
+                            el.value = v;
+                        }
                     });
                 }
 

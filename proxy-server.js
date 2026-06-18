@@ -772,7 +772,10 @@ async function handleCalendar(req, res) {
         return res.end(JSON.stringify(CAL_CACHE.data));
     }
     try {
-        const r = await fetch('https://nfs.faireconomy.media/ff_calendar_thisweek.json', { signal: AbortSignal.timeout(8000) });
+        const r = await fetch('https://nfs.faireconomy.media/ff_calendar_thisweek.json', {
+            headers: { 'user-agent': 'Mozilla/5.0 trading-app', 'accept': 'application/json' },
+            signal: AbortSignal.timeout(8000)
+        });
         if (!r.ok) throw new Error('cal ' + r.status);
         const events = await r.json();
         const nowMs = Date.now();
@@ -797,8 +800,14 @@ async function handleCalendar(req, res) {
         res.writeHead(200, { 'content-type': 'application/json' });
         res.end(JSON.stringify(out));
     } catch (err) {
-        res.writeHead(502, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message, events: [] }));
+        // Degrade gracefully: serve stale cache if we have any, otherwise an empty
+        // 200 so the UI doesn't show a hard error when the upstream feed is down/blocked.
+        if (CAL_CACHE.data) {
+            res.writeHead(200, { 'content-type': 'application/json' });
+            return res.end(JSON.stringify(CAL_CACHE.data));
+        }
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ events: [], blackoutWarning: null, note: 'calendar unavailable: ' + (err.message || String(err)) }));
     }
 }
 
