@@ -3362,7 +3362,7 @@
                     const payload = { instrument, timeframe, style, context, images: uploaded };
                     try {
                         const result = usingProxy
-                            ? await callProxy(proxyUrl.value.trim(), model, payload)
+                            ? await callProxy(getProxyBase() + '/analyze', model, payload)
                             : await callAnthropic(apiKey, model, payload);
                         renderAnalysis(result);
                         // Cost & context-sent capture (Batch C). If usage wasn't returned, estimate.
