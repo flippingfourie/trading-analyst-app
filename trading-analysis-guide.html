@@ -2697,7 +2697,7 @@
                 }
 
                 async function callCoach(profile, history, message) {
-                    const base = (document.getElementById('proxyUrl')?.value.trim() || 'http://localhost:8787/analyze').replace(/\/analyze\/?$/, '');
+                    const base = getProxyBase();
                     const url = base + '/coach';
                     const model = (document.getElementById('modelId')?.value.trim()) || 'claude-opus-4-5';
                     const r = await fetch(url, {
@@ -5062,11 +5062,7 @@
             }
 
             function initNews() {
-                const PROXY_KEY = 'tradingAnalyst.proxyUrl';
-                const proxyBase = () => {
-                    const stored = localStorage.getItem(PROXY_KEY) || 'http://localhost:8787/analyze';
-                    return stored.replace(/\/analyze\/?$/, '');
-                };
+                const proxyBase = () => getProxyBase();
                 const refreshBtn = document.getElementById('nRefresh');
                 const useCtxBtn = document.getElementById('nUseContext');
                 const aiScanBtn = document.getElementById('nAiScan');
@@ -6109,7 +6105,7 @@
                     if (!symbol) {
                         try { const t = JSON.parse(localStorage.getItem('tradingAnalyst.tracked') || '[]'); symbol = (t[t.length - 1] || {}).symbol || 'BTCUSDT'; } catch (_) { symbol = 'BTCUSDT'; }
                     }
-                    const proxy = (localStorage.getItem('tradingAnalyst.proxyUrl') || 'http://localhost:8787/analyze').replace(/\/analyze\/?$/, '');
+                    const proxy = getProxyBase();
                     proStatus.textContent = `Running Monte Carlo on ${symbol}…`;
                     try {
                         const url = `${proxy}/montecarlo?symbol=${encodeURIComponent(symbol)}&interval=1h&entry=${entry}&stop=${stop}&targets=${tps.join(',')}`;
