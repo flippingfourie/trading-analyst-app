@@ -805,7 +805,7 @@
                                             <input type="checkbox" id="useProxy" class="rounded border-zinc-300" checked>
                                             Use local proxy (recommended)
                                         </label>
-                                        <input type="text" id="proxyUrl" value="http://localhost:8787/analyze" class="block w-full px-2 py-1 text-xs bg-white border border-zinc-300 rounded-md" placeholder="http://localhost:8787/analyze">
+                                        <input type="text" id="proxyUrl" value="" class="block w-full px-2 py-1 text-xs bg-white border border-zinc-300 rounded-md" placeholder="auto (uses this page's server)">
                                         <div>
                                             <label for="modelId" class="block text-xs font-medium text-zinc-600">Model</label>
                                             <input type="text" id="modelId" value="claude-opus-4-5" class="mt-1 block w-full px-2 py-1 text-xs bg-white border border-zinc-300 rounded-md">
@@ -1318,7 +1318,11 @@
                 let recheckTimer = null;
                 const listeners = [];
                 function base() {
-                    return (localStorage.getItem('tradingAnalyst.proxyUrl') || 'http://localhost:8787/analyze').replace(/\/analyze\/?$/, '');
+                    const _purl = localStorage.getItem('tradingAnalyst.proxyUrl') || '';
+                    if (_purl) return _purl.replace(/\/analyze\/?$/, '');
+                    const _loc = window.location;
+                    if (_loc.protocol === 'file:' || _loc.hostname === 'localhost' || _loc.hostname === '127.0.0.1') return 'http://localhost:8787';
+                    return _loc.origin;
                 }
                 async function check() {
                     if (checking) return online;
@@ -2846,8 +2850,18 @@
                 // Used by every fetch that hits localhost:8787/* — keeps URL massaging in one place
                 // and falls back to the default when the input is blank.
                 function getProxyBase() {
-                    const raw = (proxyUrl && proxyUrl.value ? proxyUrl.value.trim() : '') || 'http://localhost:8787/analyze';
-                    return raw.replace(/\/analyze\/?$/, '');
+                    // If user has typed a custom URL, use that.
+                    // Otherwise auto-detect: if served by a real host (Render etc.) use that origin.
+                    // If opened as a local file fall back to localhost:8787.
+                    const stored = localStorage.getItem(PROXY_URL_KEY);
+                    const inputVal = proxyUrl && proxyUrl.value ? proxyUrl.value.trim() : '';
+                    const raw = inputVal || stored || '';
+                    if (raw) return raw.replace(/\/analyze\/?$/, '');
+                    const loc = window.location;
+                    if (loc.protocol === 'file:' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1') {
+                        return 'http://localhost:8787';
+                    }
+                    return loc.origin;
                 }
 
                 if (localStorage.getItem(STORAGE_KEY)) apiKeyInput.value = localStorage.getItem(STORAGE_KEY);
